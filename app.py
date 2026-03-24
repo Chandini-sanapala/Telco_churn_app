@@ -54,32 +54,50 @@ TotalCharges = st.sidebar.number_input("Total Charges", 0.0, 10000.0, 1000.0)
 predict_clicked = st.sidebar.button("🔍 Predict")
 
 # ==========================================================
-# ENCODING
+# ENCODING FUNCTION
 # ==========================================================
 def encode(val, mapping):
     return mapping[val]
 
-input_data = pd.DataFrame([[
-    encode(gender, {"Female":0, "Male":1}),
-    encode(SeniorCitizen, {"No":0, "Yes":1}),
-    encode(Partner, {"No":0, "Yes":1}),
-    encode(Dependents, {"No":0, "Yes":1}),
-    tenure,
-    encode(PhoneService, {"No":0, "Yes":1}),
-    encode(MultipleLines, {"No":0, "Yes":1}),
-    encode(InternetService, {"DSL":0, "Fiber optic":1, "No":2}),
-    encode(OnlineSecurity, {"No":0, "Yes":1}),
-    encode(OnlineBackup, {"No":0, "Yes":1}),
-    encode(DeviceProtection, {"No":0, "Yes":1}),
-    encode(TechSupport, {"No":0, "Yes":1}),
-    encode(StreamingTV, {"No":0, "Yes":1}),
-    encode(StreamingMovies, {"No":0, "Yes":1}),
-    encode(Contract, {"Month-to-month":0, "One year":1, "Two year":2}),
-    encode(PaperlessBilling, {"No":0, "Yes":1}),
-    encode(PaymentMethod, {"Electronic check":0,"Mailed check":1,"Bank transfer":2,"Credit card":3}),
-    MonthlyCharges,
-    TotalCharges
-]])
+if predict_clicked:
+
+    input_data = pd.DataFrame([[
+
+        encode(gender, {"Female":0, "Male":1}),
+        encode(SeniorCitizen, {"No":0, "Yes":1}),
+        encode(Partner, {"No":0, "Yes":1}),
+        encode(Dependents, {"No":0, "Yes":1}),
+        tenure,
+        encode(PhoneService, {"No":0, "Yes":1}),
+        encode(MultipleLines, {"No":0, "Yes":1}),
+        encode(InternetService, {"DSL":0, "Fiber optic":1, "No":2}),
+        encode(OnlineSecurity, {"No":0, "Yes":1}),
+        encode(OnlineBackup, {"No":0, "Yes":1}),
+        encode(DeviceProtection, {"No":0, "Yes":1}),
+        encode(TechSupport, {"No":0, "Yes":1}),
+        encode(StreamingTV, {"No":0, "Yes":1}),
+        encode(StreamingMovies, {"No":0, "Yes":1}),
+        encode(Contract, {"Month-to-month":0, "One year":1, "Two year":2}),
+        encode(PaperlessBilling, {"No":0, "Yes":1}),
+        encode(PaymentMethod, {
+            "Electronic check":0,
+            "Mailed check":1,
+            "Bank transfer":2,
+            "Credit card":3
+        }),
+        MonthlyCharges,
+        TotalCharges
+
+    ]])
+
+    # 👉 PREDICTION
+    prediction = model.predict(input_data)[0]
+
+    # 👉 OUTPUT
+    if prediction == 1:
+        st.error("⚠️ Customer will CHURN")
+    else:
+        st.success("✅ Customer will STAY")
 
 # ==========================================================
 # NAVIGATION
