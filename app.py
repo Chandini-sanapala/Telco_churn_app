@@ -1,53 +1,65 @@
 import streamlit as st
+import pandas as pd
 import pickle
-import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
 
-# Load model
-import pickle
-import os
+# ==========================================================
+# PAGE CONFIG
+# ==========================================================
+st.set_page_config(page_title="Telco Churn Prediction", layout="wide")
 
-model_path = os.path.join(os.getcwd(), "model.pkl")
-model = pickle.load(open(model_path, "rb"))
+# ==========================================================
+# LOAD MODEL & DATA
+# ==========================================================
+model = pickle.load(open("model.pkl", "rb"))
 
-st.set_page_config(page_title="Telco Churn App", layout="centered")
+@st.cache_data
+def load_data():
+    return pd.read_csv("Telco-Customer-Churn.csv")
 
-st.title("📊 Telco Customer Churn Prediction")
-st.markdown("### 🔍 Enter Customer Details")
+df = load_data()
 
-# -------- INPUTS --------
+# ==========================================================
+# SIDEBAR INPUTS
+# ==========================================================
+st.sidebar.title("⚙️ Customer Details")
 
-gender = st.selectbox("Gender", ["Female", "Male"])
-SeniorCitizen = st.selectbox("Senior Citizen", ["No", "Yes"])
-Partner = st.selectbox("Partner", ["No", "Yes"])
-Dependents = st.selectbox("Dependents", ["No", "Yes"])
+gender = st.sidebar.selectbox("Gender", ["Female", "Male"])
+SeniorCitizen = st.sidebar.selectbox("Senior Citizen", ["No", "Yes"])
+Partner = st.sidebar.selectbox("Partner", ["No", "Yes"])
+Dependents = st.sidebar.selectbox("Dependents", ["No", "Yes"])
 
-tenure = st.slider("Tenure (months)", 0, 72, 12)
+tenure = st.sidebar.slider("Tenure", 0, 72, 12)
 
-PhoneService = st.selectbox("Phone Service", ["No", "Yes"])
-MultipleLines = st.selectbox("Multiple Lines", ["No", "Yes"])
-InternetService = st.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
+PhoneService = st.sidebar.selectbox("Phone Service", ["No", "Yes"])
+MultipleLines = st.sidebar.selectbox("Multiple Lines", ["No", "Yes"])
+InternetService = st.sidebar.selectbox("Internet Service", ["DSL", "Fiber optic", "No"])
 
-OnlineSecurity = st.selectbox("Online Security", ["No", "Yes"])
-OnlineBackup = st.selectbox("Online Backup", ["No", "Yes"])
-DeviceProtection = st.selectbox("Device Protection", ["No", "Yes"])
-TechSupport = st.selectbox("Tech Support", ["No", "Yes"])
+OnlineSecurity = st.sidebar.selectbox("Online Security", ["No", "Yes"])
+OnlineBackup = st.sidebar.selectbox("Online Backup", ["No", "Yes"])
+DeviceProtection = st.sidebar.selectbox("Device Protection", ["No", "Yes"])
+TechSupport = st.sidebar.selectbox("Tech Support", ["No", "Yes"])
 
-StreamingTV = st.selectbox("Streaming TV", ["No", "Yes"])
-StreamingMovies = st.selectbox("Streaming Movies", ["No", "Yes"])
+StreamingTV = st.sidebar.selectbox("Streaming TV", ["No", "Yes"])
+StreamingMovies = st.sidebar.selectbox("Streaming Movies", ["No", "Yes"])
 
-Contract = st.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
-PaperlessBilling = st.selectbox("Paperless Billing", ["No", "Yes"])
-PaymentMethod = st.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer", "Credit card"])
+Contract = st.sidebar.selectbox("Contract", ["Month-to-month", "One year", "Two year"])
+PaperlessBilling = st.sidebar.selectbox("Paperless Billing", ["No", "Yes"])
+PaymentMethod = st.sidebar.selectbox("Payment Method", ["Electronic check", "Mailed check", "Bank transfer", "Credit card"])
 
-MonthlyCharges = st.number_input("Monthly Charges", 0.0, 200.0, 50.0)
-TotalCharges = st.number_input("Total Charges", 0.0, 10000.0, 1000.0)
+MonthlyCharges = st.sidebar.number_input("Monthly Charges", 0.0, 200.0, 50.0)
+TotalCharges = st.sidebar.number_input("Total Charges", 0.0, 10000.0, 1000.0)
 
-# -------- ENCODING --------
+predict_clicked = st.sidebar.button("🔍 Predict")
 
+# ==========================================================
+# ENCODING
+# ==========================================================
 def encode(val, mapping):
     return mapping[val]
 
-data = np.array([[
+input_data = pd.DataFrame([[
     encode(gender, {"Female":0, "Male":1}),
     encode(SeniorCitizen, {"No":0, "Yes":1}),
     encode(Partner, {"No":0, "Yes":1}),
@@ -64,46 +76,84 @@ data = np.array([[
     encode(StreamingMovies, {"No":0, "Yes":1}),
     encode(Contract, {"Month-to-month":0, "One year":1, "Two year":2}),
     encode(PaperlessBilling, {"No":0, "Yes":1}),
-    encode(PaymentMethod, {
-        "Electronic check":0,
-        "Mailed check":1,
-        "Bank transfer":2,
-        "Credit card":3
-    }),
+    encode(PaymentMethod, {"Electronic check":0,"Mailed check":1,"Bank transfer":2,"Credit card":3}),
     MonthlyCharges,
     TotalCharges
 ]])
 
-# -------- PREDICTION --------
+# ==========================================================
+# NAVIGATION
+# ==========================================================
+if "page" not in st.session_state:
+    st.session_state.page = "overview"
 
-if st.button("🚀 Predict"):
+col1, col2, col3, col4 = st.columns(4)
 
-    prediction = model.predict(data)[0]
+if col1.button("🏠 Overview"):
+    st.session_state.page = "overview"
+if col2.button("📊 Dataset"):
+    st.session_state.page = "dataset"
+if col3.button("📈 EDA"):
+    st.session_state.page = "eda"
+if col4.button("💰 Prediction"):
+    st.session_state.page = "prediction"
 
-    # Probability (if model supports it)
-    try:
-        prob = model.predict_proba(data)[0][1]
-    except:
-        prob = None
+st.markdown("---")
 
-    st.subheader("🔎 Result:")
+# ==========================================================
+# OVERVIEW
+# ==========================================================
+if st.session_state.page == "overview":
+    st.title("📊 Telco Customer Churn Dashboard")
+    st.write("This app predicts whether a customer will churn or not using ML.")
 
-    if prediction == 1:
-        st.error("⚠️ Customer is likely to CHURN")
-    else:
-        st.success("✅ Customer is likely to STAY")
+# ==========================================================
+# DATASET
+# ==========================================================
+elif st.session_state.page == "dataset":
+    st.subheader("Dataset Overview")
+    st.dataframe(df.head())
+    st.write("Shape:", df.shape)
 
-    # Show probability
-    if prob is not None:
-        st.write(f"### 📊 Churn Probability: {prob*100:.2f}%")
+# ==========================================================
+# EDA
+# ==========================================================
+elif st.session_state.page == "eda":
 
-        if prob > 0.7:
-            st.warning("⚠️ High Risk Customer")
-        elif prob > 0.4:
-            st.info("⚡ Medium Risk Customer")
+    st.subheader("Churn Distribution")
+
+    fig1 = px.histogram(df, x="tenure", title="Tenure Distribution")
+    st.plotly_chart(fig1)
+
+    fig2 = px.bar(df.groupby("Contract")["Churn"].count().reset_index(),
+                  x="Contract", y="Churn",
+                  title="Churn by Contract")
+    st.plotly_chart(fig2)
+
+# ==========================================================
+# PREDICTION
+# ==========================================================
+elif st.session_state.page == "prediction":
+
+    if predict_clicked:
+        prediction = model.predict(input_data)[0]
+
+        if prediction == 1:
+            st.error("⚠️ Customer will churn")
         else:
-            st.success("✅ Low Risk Customer")
+            st.success("✅ Customer will stay")
 
-    st.progress(int(prob*100) if prob else 50)
+        # Gauge chart
+        val = 80 if prediction == 1 else 30
 
-    st.balloons()
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=val,
+            title={"text": "Churn Risk"},
+            gauge={"axis": {"range": [0, 100]}}
+        ))
+
+        st.plotly_chart(fig)
+
+    else:
+        st.info("Enter details and click Predict")
