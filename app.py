@@ -99,7 +99,7 @@ if predict_clicked:
     else:
         st.success("✅ Customer will STAY")
         
-if prediction == 1:
+    if prediction == 1:
     st.error("⚠️ Customer is likely to CHURN")
 
     st.markdown("### 💡 Suggestions to Retain Customer:")
@@ -122,7 +122,7 @@ if prediction == 1:
     if MonthlyCharges > 70:
         st.write("👉 Provide discounts or better pricing plans")
 
-else:
+    else:
     st.success("✅ Customer is likely to STAY")
 
     st.markdown("### 🎉 Positive Insights:")
