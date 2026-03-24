@@ -90,44 +90,43 @@ if predict_clicked:
 
     ]])
 
-    # 👉 PREDICTION
+    # =========================
+    # PREDICTION
+    # =========================
     prediction = model.predict(input_data)[0]
 
-    # 👉 OUTPUT
+    # =========================
+    # OUTPUT + SUGGESTIONS
+    # =========================
     if prediction == 1:
-        st.error("⚠️ Customer will CHURN")
-    else:
-        st.success("✅ Customer will STAY")
-        
-    if prediction == 1:
-    st.error("⚠️ Customer is likely to CHURN")
+        st.error("⚠️ Customer is likely to CHURN")
 
-    st.markdown("### 💡 Suggestions to Retain Customer:")
+        st.markdown("### 💡 Suggestions to Retain Customer:")
 
-    if tenure < 12:
-        st.write("👉 Offer loyalty discounts for new customers")
+        if tenure < 12:
+            st.write("👉 Offer loyalty discounts for new customers")
 
-    if Contract == "Month-to-month":
-        st.write("👉 Encourage long-term contract plans (1 year / 2 year)")
+        if Contract == "Month-to-month":
+            st.write("👉 Encourage long-term contract plans")
 
-    if TechSupport == "No":
-        st.write("👉 Provide free or discounted tech support")
+        if TechSupport == "No":
+            st.write("👉 Provide free tech support")
 
-    if OnlineSecurity == "No":
-        st.write("👉 Add security features to increase trust")
+        if OnlineSecurity == "No":
+            st.write("👉 Add security features")
 
-    if PaymentMethod == "Electronic check":
-        st.write("👉 Suggest automatic payment methods (credit card / bank transfer)")
+        if PaymentMethod == "Electronic check":
+            st.write("👉 Suggest automatic payment methods")
 
-    if MonthlyCharges > 70:
-        st.write("👉 Provide discounts or better pricing plans")
+        if MonthlyCharges > 70:
+            st.write("👉 Provide discounts or better plans")
 
     else:
-    st.success("✅ Customer is likely to STAY")
+        st.success("✅ Customer is likely to STAY")
 
-    st.markdown("### 🎉 Positive Insights:")
-    st.write("👉 Customer is satisfied with services")
-    st.write("👉 Low risk of churn")
+        st.markdown("### 🎉 Positive Insights:")
+        st.write("👉 Customer is satisfied with services")
+        st.write("👉 Low risk of churn")
 # ==========================================================
 # NAVIGATION
 # ==========================================================
